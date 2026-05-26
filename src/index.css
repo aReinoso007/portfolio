@@ -4,19 +4,51 @@
   --font-sans: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  --color-surface: #0a0f1a;
-  --color-surface-raised: #111827;
-  --color-surface-overlay: #1a2332;
-  --color-border: #1e293b;
-  --color-border-subtle: #334155;
+  --color-surface: var(--theme-surface);
+  --color-surface-raised: var(--theme-surface-raised);
+  --color-surface-overlay: var(--theme-surface-overlay);
+  --color-border: var(--theme-border);
+  --color-border-subtle: var(--theme-border-subtle);
 
-  --color-accent: #22d3ee;
-  --color-accent-dim: #0891b2;
-  --color-accent-glow: #22d3ee33;
+  --color-accent: var(--theme-accent);
+  --color-accent-dim: var(--theme-accent-dim);
+  --color-accent-glow: var(--theme-accent-glow);
 
-  --color-text: #f1f5f9;
-  --color-text-muted: #94a3b8;
-  --color-text-subtle: #64748b;
+  --color-text: var(--theme-text);
+  --color-text-muted: var(--theme-text-muted);
+  --color-text-subtle: var(--theme-text-subtle);
+  --color-on-accent: var(--theme-on-accent);
+}
+
+:root,
+:root[data-theme="dark"] {
+  --theme-surface: #0a0f1a;
+  --theme-surface-raised: #111827;
+  --theme-surface-overlay: #1a2332;
+  --theme-border: #1e293b;
+  --theme-border-subtle: #334155;
+  --theme-accent: #22d3ee;
+  --theme-accent-dim: #0891b2;
+  --theme-accent-glow: #22d3ee33;
+  --theme-text: #f1f5f9;
+  --theme-text-muted: #94a3b8;
+  --theme-text-subtle: #64748b;
+  --theme-on-accent: #0a0f1a;
+}
+
+:root[data-theme="light"] {
+  --theme-surface: #f8fafc;
+  --theme-surface-raised: #ffffff;
+  --theme-surface-overlay: #f1f5f9;
+  --theme-border: #e2e8f0;
+  --theme-border-subtle: #cbd5e1;
+  --theme-accent: #0891b2;
+  --theme-accent-dim: #0e7490;
+  --theme-accent-glow: #0891b233;
+  --theme-text: #0f172a;
+  --theme-text-muted: #475569;
+  --theme-text-subtle: #64748b;
+  --theme-on-accent: #ffffff;
 }
 
 html {
@@ -29,6 +61,9 @@ body {
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 ::selection {
