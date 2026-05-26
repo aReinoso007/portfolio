@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { navLinks } from "../data/cv";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -40,12 +41,15 @@ export function Navbar() {
           ))}
         </ul>
 
-        <button
-          type="button"
-          className="flex flex-col gap-1.5 md:hidden"
-          aria-label="Toggle menu"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+
+          <button
+            type="button"
+            className="flex flex-col gap-1.5 md:hidden"
+            aria-label="Toggle menu"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
           <span
             className={`block h-0.5 w-5 bg-text transition-transform ${menuOpen ? "translate-y-2 rotate-45" : ""}`}
           />
@@ -55,7 +59,8 @@ export function Navbar() {
           <span
             className={`block h-0.5 w-5 bg-text transition-transform ${menuOpen ? "-translate-y-2 -rotate-45" : ""}`}
           />
-        </button>
+          </button>
+        </div>
       </nav>
 
       {menuOpen && (

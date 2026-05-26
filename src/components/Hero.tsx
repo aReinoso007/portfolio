@@ -61,7 +61,7 @@ export function Hero() {
         <div className="flex flex-wrap items-center gap-4">
           <a
             href="#contact"
-            className="rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-surface transition-opacity hover:opacity-90"
+            className="rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-on-accent transition-opacity hover:opacity-90"
           >
             Get in touch
           </a>
