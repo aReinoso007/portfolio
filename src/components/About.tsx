@@ -1,22 +1,20 @@
 import { personalInfo, languages } from "../data/cv";
+import { ScrollReveal } from "./ScrollReveal";
 import { SectionHeading } from "./SectionHeading";
 
 export function About() {
   return (
     <section id="about" className="px-6 py-24">
       <div className="mx-auto max-w-6xl">
-        <SectionHeading label="01 — About" title="Who I am" />
+        <ScrollReveal>
+          <SectionHeading label="01 — About" title="Who I am" />
+        </ScrollReveal>
 
         <div className="grid gap-12 md:grid-cols-3">
           <div className="md:col-span-2">
-            <p className="text-lg leading-relaxed text-text-muted">
-              {personalInfo.summary}
-            </p>
-            <p className="mt-6 text-text-muted">
-              I actively leverage modern AI-assisted development tools — Claude,
-              Cursor, and GitHub Copilot — to accelerate delivery and maintain
-              code quality without sacrificing architectural rigor.
-            </p>
+            <ScrollReveal>
+              <p className="text-lg leading-relaxed text-text-muted">{personalInfo.about}</p>
+            </ScrollReveal>
           </div>
 
           <div className="space-y-6">
@@ -38,7 +36,7 @@ export function About() {
               <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text-subtle">
                 Location
               </h3>
-              <p className="text-text-muted">Ecuador · Remote-ready</p>
+              <p className="text-text-muted">{personalInfo.location}</p>
             </div>
           </div>
         </div>

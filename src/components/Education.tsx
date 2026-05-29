@@ -1,11 +1,14 @@
 import { education, certifications } from "../data/cv";
+import { ScrollReveal } from "./ScrollReveal";
 import { SectionHeading } from "./SectionHeading";
 
 export function Education() {
   return (
     <section id="education" className="bg-surface-raised px-6 py-24">
       <div className="mx-auto max-w-6xl">
-        <SectionHeading label="04 — Education" title="Background & credentials" />
+        <ScrollReveal>
+          <SectionHeading label="05 — Education" title="Background & credentials" />
+        </ScrollReveal>
 
         <div className="grid gap-12 md:grid-cols-2">
           <div>

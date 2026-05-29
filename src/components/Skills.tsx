@@ -1,11 +1,14 @@
 import { skillCategories } from "../data/cv";
+import { ScrollReveal } from "./ScrollReveal";
 import { SectionHeading } from "./SectionHeading";
 
 export function Skills() {
   return (
     <section id="skills" className="px-6 py-24">
       <div className="mx-auto max-w-6xl">
-        <SectionHeading label="03 — Skills" title="Tech stack" />
+        <ScrollReveal>
+          <SectionHeading label="04 — Skills" title="Tech stack" />
+        </ScrollReveal>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {skillCategories.map((category) => (
