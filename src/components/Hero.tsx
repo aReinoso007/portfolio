@@ -1,4 +1,5 @@
 import { personalInfo } from "../data/cv";
+import { ResumeLink } from "./ResumeLink";
 
 function GitHubIcon() {
   return (
@@ -45,17 +46,18 @@ export function Hero() {
       </div>
 
       <div className="relative mx-auto max-w-6xl">
-        <p className="mb-4 font-mono text-sm text-accent">Full Stack Engineer</p>
+        <p className="mb-2 font-mono text-sm text-accent">{personalInfo.title}</p>
 
-        <h1 className="mb-6 text-5xl font-bold leading-tight tracking-tight md:text-7xl">
+        <h1 className="mb-4 text-5xl font-bold leading-tight tracking-tight md:text-7xl">
           {personalInfo.name.split(" ")[0]}
           <br />
           <span className="text-text-muted">{personalInfo.name.split(" ")[1]}</span>
         </h1>
 
-        <p className="mb-8 max-w-xl text-lg leading-relaxed text-text-muted md:text-xl">
-          Building scalable web applications across research analytics, banking,
-          and education — with React, TypeScript, and Java Spring Boot.
+        <p className="mb-3 text-sm text-text-subtle">{personalInfo.location}</p>
+
+        <p className="mb-8 max-w-2xl text-lg leading-relaxed text-text-muted md:text-xl">
+          {personalInfo.tagline}
         </p>
 
         <div className="flex flex-wrap items-center gap-4">
@@ -65,11 +67,12 @@ export function Hero() {
           >
             Get in touch
           </a>
+          <ResumeLink variant="primary" />
           <a
-            href="#experience"
+            href="#projects"
             className="rounded-lg border border-border-subtle px-6 py-3 text-sm font-medium text-text-muted transition-colors hover:border-accent/50 hover:text-text"
           >
-            View experience
+            View projects
           </a>
         </div>
 

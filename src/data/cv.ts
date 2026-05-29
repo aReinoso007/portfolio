@@ -1,40 +1,57 @@
 export const personalInfo = {
   name: "Alex Reinoso",
-  title: "Full Stack Software Engineer",
+  title: "Full Stack Developer",
+  tagline:
+    "I build data-rich web applications — most recently a scientific research platform aggregating 15M+ hypotheses and 116M+ researcher profiles at AllSci.",
+  location: "Quito, Ecuador 🇪🇨",
   email: "ralexjessiel@gmail.com",
   phone: "+593-99-895-2718",
   github: "https://github.com/aReinoso007",
   linkedin: "https://linkedin.com/in/alex-reinoso/",
+  about:
+    "I'm a Full Stack Developer based in Quito, Ecuador, with a focus on building data-rich, user-facing web applications. Most recently I worked at AllSci building features for a large-scale scientific research platform used by researchers worldwide. I enjoy turning complex data into clean, intuitive interfaces and I'm currently pursuing a Master's in AI at UNIR while actively looking for my next full-time remote opportunity.",
   summary:
     "Full Stack Software Engineer with 4+ years of experience designing and building scalable web applications across research analytics, banking, and education domains. Proficient in React, Angular, TypeScript, Java Spring Boot, Node.js, and Python, with hands-on experience integrating REST and GraphQL APIs, building data-intensive systems, and working with cloud infrastructure. Bilingual (English/Spanish) with a track record of leading engineering teams, delivering complex migrations, and collaborating cross-functionally with design and product stakeholders.",
 };
 
-export const experiences = [
+export const resumeDownload = {
+  file: "Alex_Reinoso_CV_2026_summarized.pdf",
+  filename: "Alex_Reinoso_CV_2026_summarized.pdf",
+};
+
+export interface Experience {
+  company: string;
+  role: string;
+  period: string;
+  highlights: string[];
+  technologies: string[];
+  product?: string;
+  contract?: boolean;
+}
+
+export const experiences: Experience[] = [
   {
     company: "Reframe Data",
+    product: "AllSci",
     role: "Full Stack Software Engineer",
     period: "March 2024 – Present",
     highlights: [
-      "Designed and developed scalable full-stack features for a research analytics platform using React, TypeScript, Java Spring Boot, Node.js, and Python.",
-      "Built responsive, high-performance UIs from Figma designs using Tailwind CSS and modern React architecture.",
-      "Integrated OpenSearch and OpenAlex APIs for advanced academic data retrieval, filtering, and analytics workflows.",
-      "Developed RESTful API endpoints and backend services for data processing, aggregation, and CRUD operations.",
-      "Implemented data transformation pipelines supporting interactive visualizations with Apache ECharts.",
-      "Optimized query performance for large-scale datasets in PostgreSQL and OpenSearch.",
-      "Consumed and integrated GraphQL APIs to reduce over-fetching and improve frontend performance.",
+      "Built and shipped a multi-step peer review workflow used across 15M+ hypothesis records, with structured scoring across Clarity, Impact, and Prediction dimensions",
+      "Implemented faceted search and filtering UI across 150M+ scientific records spanning articles, clinical trials, patents, grants, and researchers",
+      "Developed AERIS AI evidence display system showing Support/Refute/Mixed scores with source citations per hypothesis",
+      "Built semantic similarity scatter plot visualization for hypothesis clustering across research domains",
+      "Created personalized follow/discovery system allowing users to track articles, researchers, organizations, hypotheses, and clinical trials",
+      "Delivered fully responsive mobile layouts across all major app sections",
+      "Contributed to researcher profile pages displaying expertise bubble charts, citation counts, and h-index scores for 116M+ researchers",
     ],
     technologies: [
       "React",
       "TypeScript",
-      "Angular",
-      "Java Spring Boot",
-      "Node.js",
-      "Python",
-      "PostgreSQL",
-      "OpenSearch",
-      "GraphQL",
-      "AWS",
       "Tailwind CSS",
+      "GraphQL",
+      "OpenSearch",
+      "PostgreSQL",
+      "Apache ECharts",
     ],
   },
   {
@@ -126,9 +143,60 @@ export const languages = [
   { name: "English", level: "Bilingual (Professional)" },
 ];
 
+export interface ProjectScreenshot {
+  src: string;
+  caption: string;
+}
+
+const allsciScreenshots: ProjectScreenshot[] = [
+  { src: "allsci_images/explore-dashboard.png", caption: "Explore dashboard — Search, Browse, Chat & Visualize" },
+  { src: "allsci_images/browse-desktop.png", caption: "Browse — all content categories at a glance" },
+  { src: "allsci_images/hypotheses-browse.png", caption: "15.1M hypotheses with advanced faceted filtering" },
+  { src: "allsci_images/hypothesis-evidence.png", caption: "AERIS AI-powered hypothesis evidence scoring" },
+  { src: "allsci_images/peer-review-step1.png", caption: "Peer review: guidelines & acceptance" },
+  { src: "allsci_images/peer-review-step2.png", caption: "Peer review: structured rating form (Clarity & Impact)" },
+  { src: "allsci_images/peer-review-step3.png", caption: "Peer review: scoring with rationale" },
+  { src: "allsci_images/peer-review-preview.png", caption: "Peer review: preview before submission" },
+  { src: "allsci_images/peer-review-success.png", caption: "Peer review submitted — CV auto-updated" },
+  { src: "allsci_images/search-results.png", caption: "Multi-type search across 150M+ records" },
+  { src: "allsci_images/researcher-profile.png", caption: "Researcher profiles with expertise visualization" },
+  { src: "allsci_images/article-detail.png", caption: "Article detail with author institution network" },
+  { src: "allsci_images/semantic-similarity.png", caption: "Semantic similarity scatter plot" },
+  { src: "allsci_images/follow-explore.png", caption: "Personalized research discovery feed" },
+  { src: "allsci_images/follow-search.png", caption: "Live keyword search with highlighted results" },
+  { src: "allsci_images/follow-manage.png", caption: "Manage followed content across all categories" },
+  { src: "allsci_images/clinical-trial.png", caption: "Clinical trial overview & participation criteria" },
+  { src: "allsci_images/clinical-trial-design.png", caption: "Study design, arms & outcome measures" },
+  { src: "allsci_images/browse-mobile.png", caption: "Fully responsive mobile experience" },
+];
+
+export interface Project {
+  id: string;
+  name: string;
+  role: string;
+  description: string;
+  url: string;
+  technologies: string[];
+  screenshots: ProjectScreenshot[];
+}
+
+export const projects: Project[] = [
+  {
+    id: "allsci",
+    name: "AllSci",
+    role: "Full Stack Developer · Reframe Data",
+    description:
+      "Full-stack scientific research platform aggregating 15M+ hypotheses, 1.7M peer-reviewed articles, 1.1M clinical trials, 5.5M patents, and 116M+ researcher profiles. Built key features including a multi-step peer review workflow, AERIS AI evidence scoring display, faceted search with advanced filtering, semantic similarity visualizations, a personalized follow/discovery system, and fully responsive mobile layouts.",
+    url: "https://app.allsci.com/browse",
+    technologies: ["React", "TypeScript", "Tailwind CSS"],
+    screenshots: allsciScreenshots,
+  },
+];
+
 export const navLinks = [
   { label: "About", href: "#about" },
   { label: "Experience", href: "#experience" },
+  { label: "Projects", href: "#projects" },
   { label: "Skills", href: "#skills" },
   { label: "Education", href: "#education" },
   { label: "Contact", href: "#contact" },
