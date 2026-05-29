@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { assetPath } from "../lib/assets";
+import { FadeImage, usePreloadGalleryImages } from "./GalleryImage";
 
 export interface GalleryScreenshot {
   src: string;
@@ -12,6 +13,45 @@ interface ScreenshotGalleryProps {
 }
 
 const SWIPE_THRESHOLD_PX = 48;
+
+function lockBodyScroll() {
+  const scrollY = window.scrollY;
+  document.body.style.position = "fixed";
+  document.body.style.top = `-${scrollY}px`;
+  document.body.style.left = "0";
+  document.body.style.right = "0";
+  document.body.style.width = "100%";
+  document.body.style.overflow = "hidden";
+  return scrollY;
+}
+
+function unlockBodyScroll(scrollY: number) {
+  document.body.style.position = "";
+  document.body.style.top = "";
+  document.body.style.left = "";
+  document.body.style.right = "";
+  document.body.style.width = "";
+  document.body.style.overflow = "";
+  window.scrollTo(0, scrollY);
+}
+
+function scrollThumbIntoView(strip: HTMLDivElement, thumb: HTMLButtonElement) {
+  const thumbLeft = thumb.offsetLeft;
+  const thumbWidth = thumb.offsetWidth;
+  const stripWidth = strip.clientWidth;
+  const scrollLeft = strip.scrollLeft;
+  const thumbRight = thumbLeft + thumbWidth;
+
+  if (thumbLeft >= scrollLeft && thumbRight <= scrollLeft + stripWidth) {
+    return;
+  }
+
+  const target = thumbLeft - stripWidth / 2 + thumbWidth / 2;
+  strip.scrollTo({
+    left: Math.max(0, target),
+    behavior: "auto",
+  });
+}
 
 function NavArrow({
   direction,
@@ -27,7 +67,10 @@ function NavArrow({
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={(e) => {
+        onClick();
+        e.currentTarget.blur();
+      }}
       disabled={disabled}
       className={`flex min-h-11 min-w-11 items-center justify-center rounded-full border border-border bg-surface-raised/90 p-2.5 shadow-md backdrop-blur-sm transition-colors hover:bg-surface-raised disabled:cursor-not-allowed disabled:opacity-40 ${className}`}
       aria-label={direction === "prev" ? "Previous screenshot" : "Next screenshot"}
@@ -59,37 +102,45 @@ function FullscreenViewer({
   onNext,
 }: FullscreenViewerProps) {
   const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const savedScrollY = useRef(0);
   const active = screenshots[activeIndex];
   const isFirst = activeIndex === 0;
   const isLast = activeIndex === screenshots.length - 1;
 
   useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    savedScrollY.current = lockBodyScroll();
+    return () => unlockBodyScroll(savedScrollY.current);
+  }, []);
 
+  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
       if (event.key === "ArrowLeft" && !isFirst) onPrev();
       if (event.key === "ArrowRight" && !isLast) onNext();
     };
-
     window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [onClose, onPrev, onNext, isFirst, isLast]);
 
-  const handleTouchStart = (clientX: number) => {
-    touchStartX.current = clientX;
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
   };
 
-  const handleTouchEnd = (clientX: number) => {
-    if (touchStartX.current === null) return;
-    const delta = clientX - touchStartX.current;
-    if (delta > SWIPE_THRESHOLD_PX && !isFirst) onPrev();
-    else if (delta < -SWIPE_THRESHOLD_PX && !isLast) onNext();
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD_PX) {
+      if (deltaX > 0 && !isFirst) onPrev();
+      else if (deltaX < 0 && !isLast) onNext();
+    }
+
     touchStartX.current = null;
+    touchStartY.current = null;
   };
 
   if (!active) return null;
@@ -102,7 +153,7 @@ function FullscreenViewer({
       aria-label="Screenshot fullscreen viewer"
     >
       <div className="flex shrink-0 items-center justify-between gap-4 border-b border-border px-4 py-3 sm:px-6">
-        <span className="font-mono text-sm text-text-muted" aria-live="polite">
+        <span className="font-mono text-sm text-text-muted">
           {activeIndex + 1} / {screenshots.length}
         </span>
         <button
@@ -118,15 +169,15 @@ function FullscreenViewer({
       </div>
 
       <div
-        className="relative flex min-h-0 flex-1 items-center justify-center px-2 py-4 sm:px-16"
-        onTouchStart={(e) => handleTouchStart(e.touches[0].clientX)}
-        onTouchEnd={(e) => handleTouchEnd(e.changedTouches[0].clientX)}
+        className="relative flex min-h-0 flex-1 touch-pan-y items-center justify-center px-2 py-4 sm:px-16"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
-        <img
-          key={active.src}
-          src={assetPath(active.src)}
+        <FadeImage
+          src={active.src}
           alt={active.caption}
           className="max-h-full max-w-full object-contain"
+          containerClassName="h-full w-full"
         />
 
         {!isFirst && (
@@ -146,14 +197,17 @@ function FullscreenViewer({
       </div>
 
       <div className="shrink-0 border-t border-border bg-surface-raised/80 px-4 py-4 sm:px-6">
-        <p className="mx-auto max-w-3xl text-center text-sm leading-relaxed text-text sm:text-base">
+        <p className="mx-auto min-h-[3rem] max-w-3xl text-center text-sm leading-relaxed text-text sm:min-h-[2.5rem] sm:text-base">
           {active.caption}
         </p>
 
         <div className="mt-4 flex items-center justify-between gap-2 sm:hidden">
           <button
             type="button"
-            onClick={onPrev}
+            onClick={(e) => {
+              onPrev();
+              e.currentTarget.blur();
+            }}
             disabled={isFirst}
             className="min-h-11 flex-1 rounded-lg border border-border bg-surface px-3 text-sm font-medium text-text disabled:opacity-40"
           >
@@ -161,7 +215,10 @@ function FullscreenViewer({
           </button>
           <button
             type="button"
-            onClick={onNext}
+            onClick={(e) => {
+              onNext();
+              e.currentTarget.blur();
+            }}
             disabled={isLast}
             className="min-h-11 flex-1 rounded-lg border border-border bg-surface px-3 text-sm font-medium text-text disabled:opacity-40"
           >
@@ -178,11 +235,17 @@ export function ScreenshotGallery({ screenshots }: ScreenshotGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const thumbStripRef = useRef<HTMLDivElement>(null);
   const thumbButtonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const isInitialMount = useRef(true);
 
   const active = screenshots[activeIndex];
   const isFirst = activeIndex === 0;
   const isLast = activeIndex === screenshots.length - 1;
+  const imageSources = screenshots.map((s) => s.src);
+
+  usePreloadGalleryImages(imageSources, activeIndex);
 
   const goPrev = useCallback(() => {
     setActiveIndex((i) => Math.max(0, i - 1));
@@ -207,55 +270,68 @@ export function ScreenshotGallery({ screenshots }: ScreenshotGalleryProps) {
   }, [goPrev, goNext, isFullscreen]);
 
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    const strip = thumbStripRef.current;
     const thumb = thumbButtonRefs.current[activeIndex];
-    thumb?.scrollIntoView({
-      behavior: "smooth",
-      inline: "center",
-      block: "nearest",
-    });
+    if (!strip || !thumb) return;
+
+    scrollThumbIntoView(strip, thumb);
   }, [activeIndex]);
 
-  const handleTouchStart = (clientX: number) => {
-    touchStartX.current = clientX;
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
   };
 
-  const handleTouchEnd = (clientX: number) => {
-    if (touchStartX.current === null) return;
-    const delta = clientX - touchStartX.current;
-    if (delta > SWIPE_THRESHOLD_PX) goPrev();
-    else if (delta < -SWIPE_THRESHOLD_PX) goNext();
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD_PX) {
+      if (deltaX > 0) goPrev();
+      else goNext();
+    }
+
     touchStartX.current = null;
+    touchStartY.current = null;
   };
 
   if (!active) return null;
 
   return (
     <>
-      <div className="relative mx-auto w-full max-w-3xl">
+      <div className="relative mx-auto w-full max-w-3xl [contain:layout]">
         <div
           className="group relative touch-pan-y"
-          onTouchStart={(e) => handleTouchStart(e.touches[0].clientX)}
-          onTouchEnd={(e) => handleTouchEnd(e.changedTouches[0].clientX)}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
           <button
             type="button"
             onClick={openFullscreen}
-            className="block w-full cursor-zoom-in rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="flex h-[280px] w-full cursor-zoom-in items-center justify-center overflow-hidden rounded-xl bg-surface-overlay focus:outline-none focus-visible:ring-2 focus-visible:ring-accent sm:h-[360px] md:h-[480px]"
             aria-label="View screenshot fullscreen"
           >
-            <img
-              key={active.src}
-              src={assetPath(active.src)}
+            <FadeImage
+              src={active.src}
               alt={active.caption}
-              loading="lazy"
-              draggable={false}
-              className="max-h-[min(52vh,280px)] w-full rounded-xl bg-surface-overlay object-contain shadow-lg sm:max-h-[360px] md:max-h-[480px]"
+              className="max-h-full max-w-full object-contain"
+              containerClassName="h-full w-full"
             />
           </button>
 
           <button
             type="button"
-            onClick={openFullscreen}
+            onClick={(e) => {
+              openFullscreen();
+              e.currentTarget.blur();
+            }}
             className="absolute right-2 top-2 flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-border bg-surface-raised/90 text-text-muted backdrop-blur-sm transition-colors hover:text-text sm:right-3 sm:top-3"
             aria-label="Expand to fullscreen"
           >
@@ -288,45 +364,58 @@ export function ScreenshotGallery({ screenshots }: ScreenshotGalleryProps) {
           )}
         </div>
 
-        <div className="mt-3 flex items-center justify-between gap-2 sm:hidden">
+        <div className="mt-3 flex h-11 items-center justify-between gap-2 sm:hidden">
           <button
             type="button"
-            onClick={goPrev}
+            onClick={(e) => {
+              goPrev();
+              e.currentTarget.blur();
+            }}
             disabled={isFirst}
-            className="min-h-11 flex-1 rounded-lg border border-border bg-surface px-3 text-sm font-medium text-text transition-colors disabled:cursor-not-allowed disabled:opacity-40 active:bg-surface-overlay"
+            className="min-h-11 flex-1 rounded-lg border border-border bg-surface px-3 text-sm font-medium text-text transition-colors disabled:cursor-not-allowed disabled:opacity-40"
           >
             ← Prev
           </button>
           <button
             type="button"
-            onClick={openFullscreen}
+            onClick={(e) => {
+              openFullscreen();
+              e.currentTarget.blur();
+            }}
             className="shrink-0 rounded-lg border border-border bg-surface px-3 py-2.5 text-xs font-medium text-accent"
           >
             Fullscreen
           </button>
           <button
             type="button"
-            onClick={goNext}
+            onClick={(e) => {
+              goNext();
+              e.currentTarget.blur();
+            }}
             disabled={isLast}
-            className="min-h-11 flex-1 rounded-lg border border-border bg-surface px-3 text-sm font-medium text-text transition-colors disabled:cursor-not-allowed disabled:opacity-40 active:bg-surface-overlay"
+            className="min-h-11 flex-1 rounded-lg border border-border bg-surface px-3 text-sm font-medium text-text transition-colors disabled:cursor-not-allowed disabled:opacity-40"
           >
             Next →
           </button>
         </div>
 
-        <p className="mt-2 px-1 text-center text-sm leading-snug italic text-text-subtle">
-          {active.caption}
+        <div className="mt-2 min-h-[4.5rem] px-1 text-center sm:min-h-[3rem]">
+          <p className="text-sm leading-snug italic text-text-subtle">{active.caption}</p>
           <button
             type="button"
-            onClick={openFullscreen}
-            className="mt-1 block w-full text-xs text-accent hover:underline sm:inline sm:mt-0 sm:ml-2 sm:w-auto"
+            onClick={(e) => {
+              openFullscreen();
+              e.currentTarget.blur();
+            }}
+            className="mt-1 text-xs text-accent hover:underline"
           >
             View fullscreen
           </button>
-        </p>
+        </div>
 
         <div
-          className="mt-3 -mx-1 flex gap-2 overflow-x-auto overscroll-x-contain scroll-smooth px-1 pb-2 snap-x snap-mandatory [-webkit-overflow-scrolling:touch]"
+          ref={thumbStripRef}
+          className="mt-3 flex h-[3.75rem] touch-pan-x gap-2 overflow-x-auto overscroll-x-contain px-1 [-webkit-overflow-scrolling:touch]"
           role="tablist"
           aria-label="Screenshot thumbnails"
         >
@@ -338,15 +427,14 @@ export function ScreenshotGallery({ screenshots }: ScreenshotGalleryProps) {
               }}
               type="button"
               role="tab"
-              onClick={() => setActiveIndex(index)}
-              onDoubleClick={() => {
+              onClick={(e) => {
                 setActiveIndex(index);
-                openFullscreen();
+                e.currentTarget.blur();
               }}
-              className={`h-14 w-20 shrink-0 snap-center cursor-pointer overflow-hidden rounded-md transition-all active:scale-95 ${
+              className={`h-14 w-20 shrink-0 cursor-pointer overflow-hidden rounded-md border-2 ${
                 index === activeIndex
-                  ? "opacity-100 ring-2 ring-orange-500 ring-offset-1 ring-offset-surface-raised sm:ring-offset-2"
-                  : "opacity-60 active:opacity-90"
+                  ? "border-orange-500 opacity-100"
+                  : "border-transparent opacity-60"
               }`}
               aria-label={`View: ${shot.caption}`}
               aria-selected={index === activeIndex}
@@ -362,8 +450,8 @@ export function ScreenshotGallery({ screenshots }: ScreenshotGalleryProps) {
           ))}
         </div>
 
-        <p className="mt-1 text-center text-xs text-text-subtle sm:hidden">
-          Swipe, tap thumbnails, or open fullscreen to browse
+        <p className="mt-1 h-4 text-center text-xs text-text-subtle sm:hidden">
+          Swipe, tap thumbnails, or open fullscreen
         </p>
       </div>
 

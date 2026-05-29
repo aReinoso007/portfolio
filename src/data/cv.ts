@@ -173,9 +173,12 @@ const allsciScreenshots: ProjectScreenshot[] = [
 export interface Project {
   id: string;
   name: string;
-  role: string;
+  role?: string;
+  badges?: string[];
   description: string;
+  highlights?: string[];
   url: string;
+  github?: string | null;
   technologies: string[];
   screenshots: ProjectScreenshot[];
 }
@@ -190,6 +193,33 @@ export const projects: Project[] = [
     url: "https://app.allsci.com/browse",
     technologies: ["React", "TypeScript", "Tailwind CSS"],
     screenshots: allsciScreenshots,
+  },
+  {
+    id: "chullavida",
+    name: "Chulla Vida EC",
+    badges: ["🚀 Live in Production · Ecuador", "👤 Founder & Solo Developer"],
+    description:
+      "Full-stack online raffle platform built and launched independently in Ecuador. Handles real transactions through three payment methods: PayPhone wallet, credit/debit card, and bank transfer — each with its own confirmation flow. Includes a complete admin panel for raffle management and payment verification.",
+    highlights: [
+      "Designed and built the entire platform independently — frontend, REST API, database schema, and deployment pipeline",
+      "Integrated 3 payment methods: PayPhone gateway (webhook-based confirmation), Stripe-like card flow, and manual bank transfer with an async pending → confirmed ticket state machine",
+      "Built admin panel for operators to review pending bank transfers, manually confirm payments, and trigger ticket assignment",
+      "Designed ticket lifecycle: available → reserved (on checkout start) → pending (on bank transfer submission) → confirmed (on admin approval)",
+      "Implemented \"Consulta tus números\" feature — users look up their assigned ticket numbers by email after payment confirmation",
+      "Configured Supabase Auth + PostgreSQL for relational ticket/order data, AWS S3 for raffle assets, deployed on Vercel + Express backend",
+      "Built instant bonus system — pre-selected winning numbers displayed publicly to incentivize early purchases",
+    ],
+    url: "https://www.chullavidaec.com",
+    github: null,
+    technologies: ["React", "TypeScript", "Express", "PostgreSQL", "Supabase", "Vercel", "AWS S3"],
+    screenshots: [
+      { src: "chullav-images/hero-landing.png", caption: "Landing page — prize showcase with CTA" },
+      { src: "chullav-images/checkout-payment-methods.png", caption: "3-step checkout with PayPhone, card & bank transfer" },
+      { src: "chullav-images/ticket-packages.png", caption: "Ticket package selector with pricing tiers" },
+      { src: "chullav-images/progress-bonuses.png", caption: "Sales progress bar + instant bonus numbers" },
+      { src: "chullav-images/payment-security.png", caption: "Payment security section + ticket lookup by email" },
+      { src: "chullav-images/trust-social-proof.png", caption: "Trust signals + 668 Instagram followers social proof" },
+    ],
   },
 ];
 
