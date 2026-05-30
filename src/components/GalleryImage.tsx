@@ -6,9 +6,16 @@ interface FadeImageProps {
   alt: string;
   className?: string;
   containerClassName?: string;
+  eager?: boolean;
 }
 
-export function FadeImage({ src, alt, className = "", containerClassName = "" }: FadeImageProps) {
+export function FadeImage({
+  src,
+  alt,
+  className = "",
+  containerClassName = "",
+  eager = false,
+}: FadeImageProps) {
   const [displaySrc, setDisplaySrc] = useState(src);
   const [visible, setVisible] = useState(true);
   const pendingSrc = useRef(src);
@@ -40,6 +47,8 @@ export function FadeImage({ src, alt, className = "", containerClassName = "" }:
         src={assetPath(displaySrc)}
         alt={alt}
         decoding="async"
+        loading={eager ? "eager" : "lazy"}
+        fetchPriority={eager ? "high" : "auto"}
         draggable={false}
         className={`transition-opacity duration-150 ease-out ${visible ? "opacity-100" : "opacity-0"} ${className}`}
       />
@@ -47,23 +56,17 @@ export function FadeImage({ src, alt, className = "", containerClassName = "" }:
   );
 }
 
-export function usePreloadGalleryImages(sources: string[], activeIndex: number) {
+/** Preload only adjacent slides — never the full gallery at once. */
+export function usePreloadAdjacentImages(sources: string[], activeIndex: number, enabled: boolean) {
   useEffect(() => {
-    const preload = (src: string) => {
-      const img = new Image();
-      img.src = assetPath(src);
-    };
+    if (!enabled) return;
 
-    sources.forEach(preload);
-  }, [sources]);
-
-  useEffect(() => {
-    const neighbors = [activeIndex - 1, activeIndex, activeIndex + 1];
-    neighbors.forEach((index) => {
+    const indices = [activeIndex - 1, activeIndex, activeIndex + 1];
+    indices.forEach((index) => {
       if (index >= 0 && index < sources.length) {
         const img = new Image();
         img.src = assetPath(sources[index]);
       }
     });
-  }, [activeIndex, sources]);
+  }, [activeIndex, sources, enabled]);
 }
