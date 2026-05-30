@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { assetPath } from "../lib/assets";
-import { FadeImage, usePreloadGalleryImages } from "./GalleryImage";
+import { FadeImage, usePreloadAdjacentImages } from "./GalleryImage";
+
+const THUMB_LOAD_RADIUS = 4;
 
 export interface GalleryScreenshot {
   src: string;
@@ -245,7 +247,7 @@ export function ScreenshotGallery({ screenshots }: ScreenshotGalleryProps) {
   const isLast = activeIndex === screenshots.length - 1;
   const imageSources = screenshots.map((s) => s.src);
 
-  usePreloadGalleryImages(imageSources, activeIndex);
+  usePreloadAdjacentImages(imageSources, activeIndex, true);
 
   const goPrev = useCallback(() => {
     setActiveIndex((i) => Math.max(0, i - 1));
@@ -321,6 +323,7 @@ export function ScreenshotGallery({ screenshots }: ScreenshotGalleryProps) {
             <FadeImage
               src={active.src}
               alt={active.caption}
+              eager
               className="max-h-full max-w-full object-contain"
               containerClassName="h-full w-full"
             />
@@ -419,35 +422,42 @@ export function ScreenshotGallery({ screenshots }: ScreenshotGalleryProps) {
           role="tablist"
           aria-label="Screenshot thumbnails"
         >
-          {screenshots.map((shot, index) => (
-            <button
-              key={shot.src}
-              ref={(el) => {
-                thumbButtonRefs.current[index] = el;
-              }}
-              type="button"
-              role="tab"
-              onClick={(e) => {
-                setActiveIndex(index);
-                e.currentTarget.blur();
-              }}
-              className={`h-14 w-20 shrink-0 cursor-pointer overflow-hidden rounded-md border-2 ${
-                index === activeIndex
-                  ? "border-orange-500 opacity-100"
-                  : "border-transparent opacity-60"
-              }`}
-              aria-label={`View: ${shot.caption}`}
-              aria-selected={index === activeIndex}
-            >
-              <img
-                src={assetPath(shot.src)}
-                alt=""
-                loading="lazy"
-                draggable={false}
-                className="pointer-events-none h-full w-full object-cover object-top"
-              />
-            </button>
-          ))}
+          {screenshots.map((shot, index) => {
+            const loadThumb = Math.abs(index - activeIndex) <= THUMB_LOAD_RADIUS;
+
+            return (
+              <button
+                key={shot.src}
+                ref={(el) => {
+                  thumbButtonRefs.current[index] = el;
+                }}
+                type="button"
+                role="tab"
+                onClick={(e) => {
+                  setActiveIndex(index);
+                  e.currentTarget.blur();
+                }}
+                className={`h-14 w-20 shrink-0 cursor-pointer overflow-hidden rounded-md border-2 bg-surface-overlay ${
+                  index === activeIndex
+                    ? "border-orange-500 opacity-100"
+                    : "border-transparent opacity-60"
+                }`}
+                aria-label={`View: ${shot.caption}`}
+                aria-selected={index === activeIndex}
+              >
+                {loadThumb ? (
+                  <img
+                    src={assetPath(shot.src)}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    draggable={false}
+                    className="pointer-events-none h-full w-full object-cover object-top"
+                  />
+                ) : null}
+              </button>
+            );
+          })}
         </div>
 
         <p className="mt-1 h-4 text-center text-xs text-text-subtle sm:hidden">

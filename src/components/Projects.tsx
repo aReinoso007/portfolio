@@ -1,7 +1,7 @@
 import { projects } from "../data/cv";
 import { ScrollReveal } from "./ScrollReveal";
 import { SectionHeading } from "./SectionHeading";
-import { ScreenshotGallery } from "./ScreenshotGallery";
+import { LazyScreenshotGallery } from "./LazyScreenshotGallery";
 
 export function Projects() {
   return (
@@ -15,7 +15,7 @@ export function Projects() {
           {projects.map((project) => (
             <article
               key={project.id}
-              className="rounded-2xl border border-border bg-surface-raised"
+              className="rounded-2xl border border-border bg-surface-raised [content-visibility:auto]"
             >
               <div className="border-b border-border p-6 md:p-8">
                 {project.badges && project.badges.length > 0 && (
@@ -74,7 +74,7 @@ export function Projects() {
               </div>
 
               <div className="p-6 md:p-8">
-                <ScreenshotGallery screenshots={project.screenshots} />
+                <LazyScreenshotGallery screenshots={project.screenshots} />
               </div>
             </article>
           ))}
