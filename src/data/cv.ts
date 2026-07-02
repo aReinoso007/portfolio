@@ -177,7 +177,7 @@ export interface Project {
   badges?: string[];
   description: string;
   highlights?: string[];
-  url: string;
+  url?: string;
   github?: string | null;
   technologies: string[];
   screenshots: ProjectScreenshot[];
@@ -208,7 +208,6 @@ export const projects: Project[] = [
       "Data layer built with TanStack Query and graphql-request against a NestJS + GraphQL API",
       "PostgreSQL as the relational store for products, orders, and multi-tenant store data",
     ],
-    url: "https://marlex.com",
     github: null,
     technologies: [
       "React 19",

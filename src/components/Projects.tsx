@@ -38,14 +38,25 @@ export function Projects() {
                       <p className="mt-1 text-sm text-accent">{project.role}</p>
                     )}
                   </div>
-                  <a
-                    href={project.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition-opacity hover:opacity-90"
-                  >
-                    Visit Site →
-                  </a>
+                  {project.url ? (
+                    <a
+                      href={project.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition-opacity hover:opacity-90"
+                    >
+                      Visit Site →
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      aria-disabled="true"
+                      className="inline-flex cursor-not-allowed items-center gap-1 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent opacity-40"
+                    >
+                      Visit Site →
+                    </button>
+                  )}
                 </div>
 
                 <p className="max-w-3xl leading-relaxed text-text-muted">{project.description}</p>
