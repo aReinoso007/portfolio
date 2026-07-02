@@ -6,6 +6,29 @@ import { readdir, stat, unlink, writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
+function resolveSiteUrl(): string {
+  if (process.env.VITE_SITE_URL) {
+    return process.env.VITE_SITE_URL.replace(/\/$/, '')
+  }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.replace(/\/$/, '')}`
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL.replace(/\/$/, '')}`
+  }
+  return ''
+}
+
+function injectSiteUrl(): Plugin {
+  return {
+    name: 'inject-site-url',
+    transformIndexHtml(html) {
+      const siteUrl = resolveSiteUrl()
+      return html.replaceAll('__SITE_URL__', siteUrl)
+    },
+  }
+}
+
 function generateWebpVariants(rootDirs: string[]): Plugin {
   let publicDir = ''
   async function walkGenerate(dir: string) {
@@ -72,6 +95,7 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    injectSiteUrl(),
     generateWebpVariants(['allsci_images', 'chullav-images']),
   ],
   build: {

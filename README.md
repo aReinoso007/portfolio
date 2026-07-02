@@ -19,27 +19,35 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 | `npm run build`   | Production build         |
 | `npm run preview` | Preview production build |
 
-## Deploy
+## Deploy on Vercel (recommended)
 
-### GitHub Pages (recommended)
+This project is configured for Vercel with `vercel.json`. No base path is needed (served from `/`).
 
-Pushes to `main` automatically deploy via GitHub Actions.
+### Option A — Vercel Dashboard
 
-1. Create a GitHub repo and push this project to the `main` branch.
-2. In the repo, go to **Settings → Pages → Build and deployment**.
-3. Set **Source** to **GitHub Actions**.
-4. Push to `main` — the workflow builds and publishes to GitHub Pages.
+1. Push the repo to GitHub.
+2. Go to [vercel.com/new](https://vercel.com/new) and import the repository.
+3. Vercel auto-detects Vite — keep defaults:
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist`
+4. Deploy. Every push to `main` redeploys automatically.
 
-Your site will be live at:
+Open Graph URLs are filled in at build time from Vercel’s `VERCEL_PROJECT_PRODUCTION_URL`. For a custom domain, add it in **Project Settings → Domains** — previews and sharing will use that URL.
 
-- `https://<username>.github.io/<repo-name>/` (project site)
-- `https://<username>.github.io/` (if the repo is named `<username>.github.io`)
+Optional: set `VITE_SITE_URL` in **Project Settings → Environment Variables** if you want to override (no trailing slash).
 
-### Other platforms
+### Option B — Vercel CLI
 
-This site also works on [Vercel](https://vercel.com) or [Netlify](https://netlify.com).
+```bash
+npm i -g vercel
+vercel login
+vercel
+```
+
+Follow the prompts, then `vercel --prod` for production.
 
 ## Structure
 
 - `src/data/cv.ts` — All CV content (easy to update)
-- `src/components/` — UI sections (Hero, About, Experience, Skills, Education, Contact)
+- `src/components/` — UI sections (Hero, About, Experience, Projects, Skills, Education, Contact)
+- `vercel.json` — Vercel build and SPA routing config
