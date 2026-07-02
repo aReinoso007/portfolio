@@ -73,9 +73,11 @@ export function Projects() {
                 </div>
               </div>
 
-              <div className="p-6 md:p-8">
-                <LazyScreenshotGallery screenshots={project.screenshots} />
-              </div>
+              {project.screenshots.length > 0 && (
+                <div className="p-6 md:p-8">
+                  <LazyScreenshotGallery screenshots={project.screenshots} />
+                </div>
+              )}
             </article>
           ))}
         </div>
