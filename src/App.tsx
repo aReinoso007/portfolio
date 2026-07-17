@@ -7,9 +7,15 @@ import { Skills } from "./components/Skills";
 import { Education } from "./components/Education";
 import { Contact } from "./components/Contact";
 import { Footer } from "./components/Footer";
+import { usePathname } from "./hooks/usePathname";
+import { isResumeRoute, navigate } from "./lib/routing";
 
 const Projects = lazy(() =>
   import("./components/Projects").then((m) => ({ default: m.Projects })),
+);
+
+const ResumeModal = lazy(() =>
+  import("./components/ResumeModal").then((m) => ({ default: m.ResumeModal })),
 );
 
 function ProjectsFallback() {
@@ -17,6 +23,9 @@ function ProjectsFallback() {
 }
 
 export default function App() {
+  const pathname = usePathname();
+  const showResume = isResumeRoute(pathname);
+
   return (
     <>
       <Navbar />
@@ -32,6 +41,12 @@ export default function App() {
         <Contact />
       </main>
       <Footer />
+
+      {showResume && (
+        <Suspense fallback={null}>
+          <ResumeModal onClose={() => navigate("/", { replace: true })} />
+        </Suspense>
+      )}
     </>
   );
 }
